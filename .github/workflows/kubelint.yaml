@@ -1,0 +1,18 @@
+name: Check Kubernetes YAMLs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Scan YAMLs with KubeLinter
+        uses: stackrox/kube-linter-action@v1.0.2
+        with:
+          directory: my-chart
