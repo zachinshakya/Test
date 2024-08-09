@@ -1,0 +1,40 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: GRPCRoute
+metadata:
+  name: {{ include "web-service.fullname" . }}
+  labels:
+    {{- include "web-service.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    {{- range .Values.grpcRoute.parentRefs }}
+    - name: {{ .name }}
+      kind: {{ .kind }}
+      namespace: {{ .namespace | default "default" }}
+    {{- end }}
+  
+  hostnames:
+    {{- range .Values.grpcRoute.hostnames }}
+    - "{{ . }}"
+    {{- end }}
+
+  rules:
+    {{- range .Values.grpcRoute.rules }}
+    - matches:
+        {{- range .matches }}
+        - method:
+            {{- if .method.method }}
+            method: {{ .method.method }}
+            {{- end }}
+            {{- if .method.service }}
+            service: {{ .method.service }}
+            {{- end }}
+        {{- end }}
+      backendRefs:
+        {{- range .backendRefs }}
+        - group: "{{ .group | default "" }}"
+          kind: "{{ .kind }}"
+          name: {{ .name }}
+          port: {{ .port }}
+          weight: {{ .weight }}
+        {{- end }}
+    {{- end }}
